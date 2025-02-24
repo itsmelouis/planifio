@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { Separator } from '@/components/ui/separator'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-vue-next'
 import AppSidebar from "@/components/AppSidebar.vue";
@@ -19,18 +20,17 @@ import AppSidebar from "@/components/AppSidebar.vue";
             <Search class="size-6 text-muted-foreground" />
           </span>
         </div>
+        <div class="flex items-center ml-auto gap-4">
+          <ThemeColor />
+          <Avatar>
+            <AvatarImage src="https://github.com/unovue.png" alt="@unovue" />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
+        </div>
       </header>
       <main class="flex flex-1 flex-col gap-4 p-4">
         <slot />
       </main>
-      <!-- <div class="">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-        </div>
-        <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-      </div> -->
     </SidebarInset>
   </SidebarProvider>
 </template>
