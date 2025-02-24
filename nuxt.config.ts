@@ -6,9 +6,11 @@ export default defineNuxtConfig({
     compatibilityVersion: 4
   },
 
-  modules: ['@vite-pwa/nuxt', 'shadcn-nuxt', '@nuxtjs/tailwindcss'],
+  modules: ['@vite-pwa/nuxt', 'shadcn-nuxt', '@nuxtjs/tailwindcss', '@nuxtjs/color-mode'],
 
-
+  colorMode: {
+    classSuffix: ''
+  }, 
   shadcn: {
     /**
      * Prefix for all the imported component
