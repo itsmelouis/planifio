@@ -1,8 +1,302 @@
 <script setup lang="ts">
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent
+} from '@/components/ui/card'
+
+import { CreditCard, Nfc, HandCoins } from 'lucide-vue-next'
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  ExpandedState,
+  SortingState,
+  VisibilityState,
+} from '@tanstack/vue-table'
+import { valueUpdater } from '~/lib/utils'
 import { Button } from '@/components/ui/button'
-const router = useRouter();
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+import { Input } from '@/components/ui/input'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  FlexRender,
+  getCoreRowModel,
+  getExpandedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useVueTable,
+} from '@tanstack/vue-table'
+import { ArrowUpDown, ChevronDown } from 'lucide-vue-next'
+import { h, ref } from 'vue'
+
+export interface Payment {
+  id: string
+  amount: number
+  status: 'pending' | 'processing' | 'success' | 'failed'
+  email: string
+}
+
+const data: Payment[] = [
+  {
+    id: 'm5gr84i9',
+    amount: 316,
+    status: 'success',
+    email: 'ken99@yahoo.com',
+  },
+  {
+    id: '3u1reuv4',
+    amount: 242,
+    status: 'success',
+    email: 'Abe45@gmail.com',
+  },
+  {
+    id: 'derv1ws0',
+    amount: 837,
+    status: 'processing',
+    email: 'Monserrat44@gmail.com',
+  },
+  {
+    id: '5kma53ae',
+    amount: 874,
+    status: 'success',
+    email: 'Silas22@gmail.com',
+  },
+  {
+    id: 'bhqecj4p',
+    amount: 721,
+    status: 'failed',
+    email: 'carmella@hotmail.com',
+  },
+]
+
+const columns: ColumnDef<Payment>[] = [
+  {
+    id: 'select',
+    header: ({ table }) => h(Checkbox, {
+      'modelValue': table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
+      'onUpdate:modelValue': value => table.toggleAllPageRowsSelected(!!value),
+      'ariaLabel': 'Select all',
+    }),
+    cell: ({ row }) => h(Checkbox, {
+      'modelValue': row.getIsSelected(),
+      'onUpdate:modelValue': value => row.toggleSelected(!!value),
+      'ariaLabel': 'Select row',
+    }),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => h('div', { class: 'capitalize' }, row.getValue('status')),
+  },
+  {
+    accessorKey: 'email',
+    header: ({ column }) => {
+      return h(Button, {
+        variant: 'ghost',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+      }, () => ['Email', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
+    },
+    cell: ({ row }) => h('div', { class: 'lowercase' }, row.getValue('email')),
+  },
+  {
+    accessorKey: 'amount',
+    header: () => h('div', { class: 'text-right' }, 'Amount'),
+    cell: ({ row }) => {
+      const amount = Number.parseFloat(row.getValue('amount'))
+
+      // Format the amount as a dollar amount
+      const formatted = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(amount)
+
+      return h('div', { class: 'text-right font-medium' }, formatted)
+    },
+  },
+  {
+    id: 'actions',
+    enableHiding: false,
+    cell: ({ row }) => {
+      const payment = row.original
+
+      return row.getValue("actions")
+    },
+  },
+]
+
+const sorting = ref<SortingState>([])
+const columnFilters = ref<ColumnFiltersState>([])
+const columnVisibility = ref<VisibilityState>({})
+const rowSelection = ref({})
+const expanded = ref<ExpandedState>({})
+
+const table = useVueTable({
+  data,
+  columns,
+  getCoreRowModel: getCoreRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  getExpandedRowModel: getExpandedRowModel(),
+  onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
+  onColumnFiltersChange: updaterOrValue => valueUpdater(updaterOrValue, columnFilters),
+  onColumnVisibilityChange: updaterOrValue => valueUpdater(updaterOrValue, columnVisibility),
+  onRowSelectionChange: updaterOrValue => valueUpdater(updaterOrValue, rowSelection),
+  onExpandedChange: updaterOrValue => valueUpdater(updaterOrValue, expanded),
+  state: {
+    get sorting() { return sorting.value },
+    get columnFilters() { return columnFilters.value },
+    get columnVisibility() { return columnVisibility.value },
+    get rowSelection() { return rowSelection.value },
+    get expanded() { return expanded.value },
+  },
+})
 </script>
 
 <template>
-  <Button @click="router.go('about')">Button</Button>
+  <h1 class="text-3xl font-semibold">Dashboard</h1>
+  <div class="grid auto-rows-min gap-4 md:grid-cols-3">
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-3xl">Personal Card</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="w-64 h-40 bg-gradient-to-r from-blue-700 via-blue-800 to-gray-900 rounded-lg shadow-lg">
+          <div class="flex justify-between m-2 mt-5">
+            <CreditCard color="white" :size="34" />
+            <Nfc color="white" :size="34" />
+          </div>
+          <div class="flex justify-center mt-4">
+            <h1 class="text-gray-400 font-thin font-os">
+              XXXX XXXX XXXX 1234
+            </h1>
+          </div>
+          <div class="flex flex-col justfiy-end mt-4 p-4 text-gray-400 font-quick">
+            <p class="font-bold text-xs">12 / 17</p>
+            <h4 class="uppercase tracking-wider font-semibold text-xs">
+              FLOQUET LOUIS
+            </h4>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-3xl">Upcoming payments</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="flex gap-4 justify-center">
+          <div class="flex flex-col gap-4 items-center">
+            <div class="bg-blue-950 p-4 rounded-md">
+              <HandCoins color="white" />
+            </div>
+            <div class="text-center">
+              <h2 class="text-xl font-semibold text-blue-950">Freelance</h2>
+              <p class="text-sm text-gray-400">
+                Unregular payment
+              </p>
+            </div>
+            <div>
+              <p class="text-3xl font-bold text-blue-950">$1,500</p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-4 items-center">
+            <div class="bg-blue-950 p-4 rounded-md">
+              <HandCoins color="white" />
+            </div>
+            <div class="text-center">
+              <h2 class="text-xl font-semibold text-blue-950">Salary</h2>
+              <p class="text-sm text-gray-400">
+                Regular payment
+              </p>
+            </div>
+            <div>
+              <p class="text-3xl font-bold text-blue-950">$4,000</p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+    <!-- <div class="aspect-video rounded-xl bg-muted/50" /> -->
+  </div>
+  <div class="w-full">
+    <div class="flex items-center py-4">
+      <h2 class="text-xl font-semibold">Recent transactions</h2>
+      <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Button variant="outline" class="ml-auto">
+            Columns <ChevronDown class="ml-2 h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuCheckboxItem
+            v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
+            :key="column.id"
+            class="capitalize"
+            :model-value="column.getIsVisible()"
+            @update:model-value="(value) => {
+              column.toggleVisibility(!!value)
+            }"
+          >
+            {{ column.id }}
+          </DropdownMenuCheckboxItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+    <div class="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+            <TableHead v-for="header in headerGroup.headers" :key="header.id">
+              <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header" :props="header.getContext()" />
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <template v-if="table.getRowModel().rows?.length">
+            <template v-for="row in table.getRowModel().rows" :key="row.id">
+              <TableRow :data-state="row.getIsSelected() && 'selected'">
+                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                  <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                </TableCell>
+              </TableRow>
+              <TableRow v-if="row.getIsExpanded()">
+                <TableCell :colspan="row.getAllCells().length">
+                  {{ JSON.stringify(row.original) }}
+                </TableCell>
+              </TableRow>
+            </template>
+          </template>
+
+          <TableRow v-else>
+            <TableCell
+              :colspan="columns.length"
+              class="h-24 text-center"
+            >
+              No results.
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  </div>
+
 </template>
