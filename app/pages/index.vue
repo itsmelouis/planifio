@@ -10,7 +10,7 @@ import {
   CardContent
 } from '@/components/ui/card'
 
-import { HandCoins } from 'lucide-vue-next'
+import { CreditCardIcon, Nfc, HandCoins, Download } from 'lucide-vue-next'
 import type {
   ColumnDef,
   ColumnFiltersState,
@@ -176,6 +176,45 @@ const table = useVueTable({
 })
 
 const { user } = useUserSession();
+
+const exportToCSV = () => {
+  const visibleColumns = table.getVisibleLeafColumns().filter(
+    column => column.id !== 'select' && column.id !== 'actions'
+  )
+  
+  const headers = visibleColumns.map(column => {
+    return column.id.charAt(0).toUpperCase() + column.id.slice(1)
+  }).join(',')
+  
+  const rows = table.getRowModel().rows.map(row => {
+    return visibleColumns.map(column => {
+      const value = row.getValue(column.id)
+      if (column.id === 'amount') {
+        return value
+      }
+      return typeof value === 'string' && value.includes(',') 
+        ? `"${value}"` 
+        : value
+    }).join(',')
+  }).join('\n')
+  
+  const csv = `${headers}\n${rows}`
+  
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  
+  const url = URL.createObjectURL(blob)
+  
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', 'transactions.csv')
+  
+  document.body.appendChild(link)
+  
+  link.click()
+  
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
 </script>
 
 <template>
@@ -218,22 +257,27 @@ const { user } = useUserSession();
   <div class="w-full">
     <div class="flex items-center py-4">
       <h2 class="text-xl font-semibold">Recent transactions</h2>
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Button variant="outline" class="ml-auto">
-            Columns
-            <ChevronDown class="ml-2 h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuCheckboxItem v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
-            :key="column.id" class="capitalize" :model-value="column.getIsVisible()" @update:model-value="(value) => {
-              column.toggleVisibility(!!value)
-            }">
-            {{ column.id }}
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div class="ml-auto flex gap-2">
+        <Button variant="outline" @click="exportToCSV" class="flex items-center gap-1">
+          <Download class="h-4 w-4" />
+          Export CSV
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <Button variant="outline">
+              Columns <ChevronDown class="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuCheckboxItem v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
+              :key="column.id" class="capitalize" :model-value="column.getIsVisible()" @update:model-value="(value) => {
+                column.toggleVisibility(!!value)
+              }">
+              {{ column.id }}
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
     <div class="rounded-md border">
       <Table>
