@@ -57,61 +57,83 @@ export interface Payment {
   status: 'pending' | 'processing' | 'success' | 'failed'
   email: string
   title?: string
+  date?: string
 }
 
-const data: Payment[] = [
-  {
-    id: 'm5gr84i9',
-    amount: 316,
-    status: 'success',
-    email: 'ken99@yahoo.com',
-    title: 'Freelance Design'
-  },
-  {
-    id: '3u1reuv4',
-    amount: 242,
-    status: 'success',
-    email: 'Abe45@gmail.com',
-    title: 'Web Development'
-  },
-  {
-    id: 'derv1ws0',
-    amount: 837,
-    status: 'processing',
-    email: 'Monserrat44@gmail.com',
-    title: 'Consulting'
-  },
-  {
-    id: '5kma53ae',
-    amount: 874,
-    status: 'success',
-    email: 'Silas22@gmail.com',
-    title: 'Monthly Salary'
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@hotmail.com',
-    title: 'Project Payment'
-  },
-]
+export interface UpcomingPayment {
+  id: number
+  name: string
+  amount: number
+  date: string
+  type: string
+}
 
-const storedTransactions = ref<Payment[]>([])
-onMounted(() => {
+const data = ref<Payment[]>([])
+const upcomingPayments = ref<UpcomingPayment[]>([])
+
+const loadTransactions = () => {
   try {
-    const transactions = localStorage.getItem('transactions')
-    if (transactions) {
-      const parsedTransactions = JSON.parse(transactions)
-      storedTransactions.value = parsedTransactions
+    const storedTransactions = localStorage.getItem('transactions')
+    if (storedTransactions) {
+      const parsedTransactions = JSON.parse(storedTransactions)
+      // Make sure each transaction has the required properties for the table
+      const formattedTransactions = parsedTransactions.map((transaction: any) => ({
+        id: transaction.id || generateTransactionId(),
+        amount: transaction.amount,
+        status: transaction.status || 'success',
+        email: transaction.email || user?.value?.email || 'user@example.com',
+        title: transaction.title || 'Transaction',
+        date: transaction.date || new Date().toISOString().split('T')[0]
+      }))
+      data.value = formattedTransactions
     }
   } catch (error) {
-    console.error('Error loading transactions from localStorage:', error)
+    console.error('Error loading transactions:', error)
   }
+}
+
+const loadUpcomingPayments = () => {
+  try {
+    const storedPayments = localStorage.getItem('payments')
+    if (storedPayments) {
+      const parsedPayments = JSON.parse(storedPayments)
+      
+      // Create upcoming payments from regular payments
+      // Only use regular payments with status pending or processing
+      const upcoming = parsedPayments
+        .filter((payment: any) => 
+          payment.frequency === 'regular' && 
+          (payment.status === 'pending' || payment.status === 'processing')
+        )
+        .map((payment: any, index: number) => {
+          // Generate a future date for upcoming payment
+          const today = new Date()
+          const futureDate = new Date()
+          futureDate.setDate(today.getDate() + (index + 1) * 7) // Every week
+          
+          return {
+            id: payment.id,
+            name: payment.name,
+            amount: payment.amount,
+            date: futureDate.toISOString().split('T')[0],
+            type: payment.type
+          }
+        })
+      
+      upcomingPayments.value = upcoming
+    }
+  } catch (error) {
+    console.error('Error loading upcoming payments:', error)
+  }
+}
+
+onMounted(() => {
+  loadTransactions()
+  loadUpcomingPayments()
 })
 
 const combinedData = computed(() => {
-  return [...data, ...storedTransactions.value]
+  return data.value
 })
 
 const columns: ColumnDef<Payment>[] = [
@@ -244,6 +266,10 @@ const exportToCSV = () => {
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 }
+
+function generateTransactionId() {
+  return Math.random().toString(36).substr(2, 9);
+}
 </script>
 
 <template>
@@ -263,19 +289,20 @@ const exportToCSV = () => {
         <CardTitle class="text-3xl">Upcoming payments</CardTitle>
       </CardHeader>
       <CardContent>
-        <div class="flex flex-1 justify-center">
-          <div class="flex flex-col gap-4 items-center">
-            <div class="bg-blue-950 p-4 rounded-md">
-              <HandCoins color="white" />
-            </div>
-            <div class="text-center">
-              <h2 class="text-xl font-semibold text-blue-950 dark:text-white">Salary</h2>
-              <p class="text-sm text-gray-400">
-                Regular payment
-              </p>
+        <div class="grid gap-4">
+          <div v-if="upcomingPayments.length === 0" class="text-center py-6 text-muted-foreground">
+            No upcoming payments
+          </div>
+          <div v-else v-for="payment in upcomingPayments" :key="payment.id" class="flex items-center justify-between space-x-4">
+            <div class="flex items-center space-x-4">
+              <div>
+                <p class="text-sm font-medium leading-none">{{ payment.name }}</p>
+                <p class="text-sm text-muted-foreground">{{ payment.date }}</p>
+              </div>
             </div>
             <div>
-              <p class="text-3xl font-bold text-blue-950 dark:text-white">$4,000</p>
+              <p class="text-sm font-medium leading-none">${{ payment.amount.toLocaleString() }}</p>
+              <p class="text-sm text-muted-foreground capitalize">{{ payment.type }}</p>
             </div>
           </div>
         </div>

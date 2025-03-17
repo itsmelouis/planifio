@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { HandCoins, Plus, Trash2, ArrowRight, Check, Mail } from 'lucide-vue-next'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { useRouter } from 'vue-router'
+import { onMounted, ref } from 'vue'
 
 const router = useRouter()
 const { toast } = useToast()
@@ -36,26 +37,40 @@ interface Transaction {
   title?: string;
 }
 
-const payments = ref<Payment[]>([
-  { 
-    id: 1, 
-    type: 'freelance', 
-    name: 'Freelance', 
-    amount: 1500, 
-    frequency: 'unregular', 
-    status: 'success',
-    email: user?.value?.email ?? 'user@example.com'
-  },
-  { 
-    id: 2, 
-    type: 'salary', 
-    name: 'Salary', 
-    amount: 4000, 
-    frequency: 'regular', 
-    status: 'success',
-    email: user?.value?.email ?? 'user@example.com'
+const payments = ref<Payment[]>([])
+
+const loadPayments = () => {
+  try {
+    const storedPayments = localStorage.getItem('payments')
+    if (storedPayments) {
+      payments.value = JSON.parse(storedPayments)
+    }
+  } catch (error) {
+    console.error('Error loading payments:', error)
+    toast({
+      title: 'Error',
+      description: 'Failed to load payments',
+      variant: 'destructive',
+    })
   }
-])
+}
+
+const savePayments = () => {
+  try {
+    localStorage.setItem('payments', JSON.stringify(payments.value))
+  } catch (error) {
+    console.error('Error saving payments:', error)
+    toast({
+      title: 'Error',
+      description: 'Failed to save payments',
+      variant: 'destructive',
+    })
+  }
+}
+
+onMounted(() => {
+  loadPayments()
+})
 
 const newPayment = ref({
   name: '',
@@ -103,14 +118,23 @@ const createTransaction = (payment: Payment): Transaction => {
 const recordTransaction = (payment: Payment) => {
   const transaction = createTransaction(payment)
   
-  const transactions = JSON.parse(localStorage.getItem('transactions') || '[]')
-  transactions.push(transaction)
-  localStorage.setItem('transactions', JSON.stringify(transactions))
-  
-  toast({
-    title: 'Transaction recorded',
-    description: `Payment "${payment.name}" has been recorded as a transaction`,
-  })
+  try {
+    const transactions = JSON.parse(localStorage.getItem('transactions') || '[]')
+    transactions.push(transaction)
+    localStorage.setItem('transactions', JSON.stringify(transactions))
+    
+    toast({
+      title: 'Transaction recorded',
+      description: `Payment "${payment.name}" has been recorded as a transaction`,
+    })
+  } catch (error) {
+    console.error('Error recording transaction:', error)
+    toast({
+      title: 'Error',
+      description: 'Failed to record transaction',
+      variant: 'destructive',
+    })
+  }
 }
 
 const addPayment = () => {
@@ -133,7 +157,9 @@ const addPayment = () => {
     return
   }
 
-  const id = Math.max(0, ...payments.value.map(p => p.id)) + 1
+  const id = payments.value.length > 0 
+    ? Math.max(0, ...payments.value.map(p => p.id)) + 1 
+    : 1
   
   const newPaymentObj: Payment = {
     id,
@@ -146,6 +172,7 @@ const addPayment = () => {
   }
   
   payments.value.push(newPaymentObj)
+  savePayments()
   
   recordTransaction(newPaymentObj)
 
@@ -168,10 +195,49 @@ const addPayment = () => {
 
 const deletePayment = (id: number) => {
   payments.value = payments.value.filter(payment => payment.id !== id)
+  savePayments()
+  
   toast({
     title: 'Payment deleted',
     description: 'Payment has been deleted successfully',
   })
+}
+
+const updatePaymentStatus = (paymentId: number, newStatus: string) => {
+  const paymentIndex = payments.value.findIndex(p => p.id === paymentId)
+  if (paymentIndex !== -1 && payments.value[paymentIndex]) {
+    payments.value[paymentIndex].status = newStatus as 'pending' | 'processing' | 'success' | 'failed'
+    savePayments()
+    
+    try {
+      const transactions = JSON.parse(localStorage.getItem('transactions') || '[]')
+      const paymentName = payments.value[paymentIndex].name
+      const updatedTransactions = transactions.map((transaction: any) => {
+        if (transaction.title === paymentName) {
+          return { ...transaction, status: newStatus }
+        }
+        return transaction
+      })
+      localStorage.setItem('transactions', JSON.stringify(updatedTransactions))
+    } catch (error) {
+      console.error('Error updating transaction status:', error)
+    }
+    
+    toast({
+      title: 'Status updated',
+      description: `Payment status has been updated to ${newStatus}`,
+    })
+  }
+}
+
+const openStatusDropdown = ref<number | null>(null)
+
+const toggleStatusDropdown = (paymentId: number) => {
+  if (openStatusDropdown.value === paymentId) {
+    openStatusDropdown.value = null
+  } else {
+    openStatusDropdown.value = paymentId
+  }
 }
 
 const getStatusColor = (status: string) => {
@@ -267,11 +333,38 @@ const getStatusButtonClass = (status: string, isSelected: boolean) => {
                   <div class="flex flex-col items-center gap-2 w-full">
                     <div class="flex items-center gap-2">
                       <span class="text-sm">Status:</span>
-                      <span :class="getStatusColor(payment.status)" class="px-2 py-1 rounded-full text-xs">
-                        {{ payment.status === 'success' ? 'Success' : 
-                           payment.status === 'pending' ? 'Pending' : 
-                           payment.status === 'processing' ? 'Processing' : 'Failed' }}
-                      </span>
+                      <div class="relative">
+                        <span 
+                          :class="getStatusColor(payment.status)" 
+                          class="px-2 py-1 rounded-full text-xs cursor-pointer"
+                          @click="toggleStatusDropdown(payment.id)"
+                        >
+                          {{ payment.status === 'success' ? 'Success' : 
+                             payment.status === 'pending' ? 'Pending' : 
+                             payment.status === 'processing' ? 'Processing' : 'Failed' }}
+                        </span>
+                        <div 
+                          v-if="openStatusDropdown === payment.id" 
+                          class="absolute z-10 mt-1 w-36 rounded-md bg-white shadow-lg"
+                        >
+                          <div class="py-1">
+                            <button
+                              v-for="status in statusTypes"
+                              :key="status.value"
+                              @click="() => {
+                                updatePaymentStatus(payment.id, status.value);
+                                openStatusDropdown = null;
+                              }"
+                              :class="[
+                                'block w-full text-left px-4 py-2 text-sm',
+                                getStatusButtonClass(status.value, false)
+                              ]"
+                            >
+                              {{ status.label }}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <div class="flex items-center gap-2">
                       <Mail class="h-4 w-4" />
