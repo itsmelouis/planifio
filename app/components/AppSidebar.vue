@@ -7,21 +7,23 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarFooter,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
 // Menu items.
-const itemsFirst = [
+const topItems = [
   {
     title: "Overview",
-    url: "#",
+    url: "/",
     icon: Home,
   },
   {
     title: "Messages",
     url: "#",
     icon: Inbox,
+    disabled: true,
   },
   {
     title: "Payments",
@@ -30,55 +32,55 @@ const itemsFirst = [
   },
   {
     title: "Statitics",
-    url: "#",
+    url: "/statistics",
     icon: ChartAreaIcon,
   },
 ];
 
-const itemsSecond = [
+const bottomItems = [
   {
     title: "Accounts",
-    url: "#",
+    url: "/account",
     icon: UserCircle
   },
   {
     title: "Settings",
-    url: "#",
+    url: "/settings",
     icon: Settings,
   },
 ]
 </script>
 
 <template>
-  <Sidebar>
+  <Sidebar collapsible="icon">
     <SidebarContent>
       <SidebarGroup>
         <SidebarGroupLabel>Planifio</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
-            <SidebarMenuItem v-for="item in itemsFirst" :key="item.title">
-              <SidebarMenuButton asChild>
-                <a :href="item.url">
+            <SidebarMenuItem v-for="item in topItems" :key="item.title" >
+              <SidebarMenuButton asChild :isActive="$route.path === item.url">
+                <NuxtLink :to="item.url">
                   <component :is="item.icon" />
                   <span>{{ item.title }}</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <SidebarMenuItem v-for="item in itemsSecond" :key="item.title">
-              <SidebarMenuButton asChild>
-                <a :href="item.url">
-                  <component :is="item.icon" />
-                  <span>{{ item.title }}</span>
-                </a>
+                </NuxtLink>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarContent>
+    <SidebarFooter>
+      <SidebarMenu>
+            <SidebarMenuItem v-for="item in bottomItems" :key="item.title">
+              <SidebarMenuButton asChild :isActive="$route.path === item.url">
+                <NuxtLink :to="item.url">
+                  <component :is="item.icon" />
+                  <span>{{ item.title }}</span>
+                </NuxtLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+    </SidebarFooter>
   </Sidebar>
 </template>
