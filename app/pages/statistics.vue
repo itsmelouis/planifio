@@ -3,9 +3,9 @@ import { DonutChart } from '@/components/ui/chart-donut'
 import { AreaChart } from '@/components/ui/chart-area'
 
 
-// definePageMeta({
-  //   middleware: 'auth',
-  // })
+definePageMeta({
+    middleware: 'auth',
+})
   
 const mode = useColorMode()
 
