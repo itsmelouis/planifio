@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { Separator } from '@/components/ui/separator'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-vue-next'
 import AppSidebar from "@/components/AppSidebar.vue";
+
 </script>
 
 <template>
@@ -22,10 +22,7 @@ import AppSidebar from "@/components/AppSidebar.vue";
         </div>
         <div class="flex items-center ml-auto gap-4">
           <ThemeColor />
-          <Avatar>
-            <AvatarImage src="https://github.com/unovue.png" alt="@unovue" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
+          <UserNav />
         </div>
       </header>
       <main class="flex flex-1 flex-col gap-4 p-4">
