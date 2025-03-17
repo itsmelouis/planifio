@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// definePageMeta({
+//   middleware: 'auth',
+// })
+
 import {
   Card,
   CardHeader,
@@ -6,7 +10,7 @@ import {
   CardContent
 } from '@/components/ui/card'
 
-import { CreditCard, Nfc, HandCoins } from 'lucide-vue-next'
+import { HandCoins } from 'lucide-vue-next'
 import type {
   ColumnDef,
   ColumnFiltersState,
@@ -24,7 +28,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import { Input } from '@/components/ui/input'
+import CreditCard from '~/components/CreditCard.vue'
+
 import {
   Table,
   TableBody,
@@ -169,33 +174,20 @@ const table = useVueTable({
     get expanded() { return expanded.value },
   },
 })
+
+const { user } = useUserSession();
 </script>
 
 <template>
-  <h1 class="text-3xl font-semibold">Dashboard</h1>
-  <div class="grid auto-rows-min gap-4 md:grid-cols-3">
+  <h2 class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">Dashboard</h2>
+
+  <div class="grid auto-rows-min gap-4 md:grid-cols-2">
     <Card>
       <CardHeader>
-        <CardTitle class="text-3xl">Personal Card</CardTitle>
+        <CardTitle class="text-3xl">Personal card</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div class="w-64 h-40 bg-gradient-to-r from-blue-700 via-blue-800 to-gray-900 rounded-lg shadow-lg">
-          <div class="flex justify-between m-2 mt-5">
-            <CreditCard color="white" :size="34" />
-            <Nfc color="white" :size="34" />
-          </div>
-          <div class="flex justify-center mt-4">
-            <h1 class="text-gray-400 font-thin font-os">
-              XXXX XXXX XXXX 1234
-            </h1>
-          </div>
-          <div class="flex flex-col justfiy-end mt-4 p-4 text-gray-400 font-quick">
-            <p class="font-bold text-xs">12 / 17</p>
-            <h4 class="uppercase tracking-wider font-semibold text-xs">
-              FLOQUET LOUIS
-            </h4>
-          </div>
-        </div>
+      <CardContent class="w-full max-w-3xl mx-auto">
+        <CreditCard :name="user?.name" />
       </CardContent>
     </Card>
     <Card>
@@ -203,33 +195,19 @@ const table = useVueTable({
         <CardTitle class="text-3xl">Upcoming payments</CardTitle>
       </CardHeader>
       <CardContent>
-        <div class="flex gap-4 justify-center">
+        <div class="flex flex-1 justify-center">
           <div class="flex flex-col gap-4 items-center">
             <div class="bg-blue-950 p-4 rounded-md">
               <HandCoins color="white" />
             </div>
             <div class="text-center">
-              <h2 class="text-xl font-semibold text-blue-950">Freelance</h2>
-              <p class="text-sm text-gray-400">
-                Unregular payment
-              </p>
-            </div>
-            <div>
-              <p class="text-3xl font-bold text-blue-950">$1,500</p>
-            </div>
-          </div>
-          <div class="flex flex-col gap-4 items-center">
-            <div class="bg-blue-950 p-4 rounded-md">
-              <HandCoins color="white" />
-            </div>
-            <div class="text-center">
-              <h2 class="text-xl font-semibold text-blue-950">Salary</h2>
+              <h2 class="text-xl font-semibold text-blue-950 dark:text-white">Salary</h2>
               <p class="text-sm text-gray-400">
                 Regular payment
               </p>
             </div>
             <div>
-              <p class="text-3xl font-bold text-blue-950">$4,000</p>
+              <p class="text-3xl font-bold text-blue-950 dark:text-white">$4,000</p>
             </div>
           </div>
         </div>
@@ -243,19 +221,15 @@ const table = useVueTable({
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
           <Button variant="outline" class="ml-auto">
-            Columns <ChevronDown class="ml-2 h-4 w-4" />
+            Columns
+            <ChevronDown class="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuCheckboxItem
-            v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
-            :key="column.id"
-            class="capitalize"
-            :model-value="column.getIsVisible()"
-            @update:model-value="(value) => {
+          <DropdownMenuCheckboxItem v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
+            :key="column.id" class="capitalize" :model-value="column.getIsVisible()" @update:model-value="(value) => {
               column.toggleVisibility(!!value)
-            }"
-          >
+            }">
             {{ column.id }}
           </DropdownMenuCheckboxItem>
         </DropdownMenuContent>
@@ -266,7 +240,8 @@ const table = useVueTable({
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
             <TableHead v-for="header in headerGroup.headers" :key="header.id">
-              <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header" :props="header.getContext()" />
+              <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
+                :props="header.getContext()" />
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -287,10 +262,7 @@ const table = useVueTable({
           </template>
 
           <TableRow v-else>
-            <TableCell
-              :colspan="columns.length"
-              class="h-24 text-center"
-            >
+            <TableCell :colspan="columns.length" class="h-24 text-center">
               No results.
             </TableCell>
           </TableRow>
