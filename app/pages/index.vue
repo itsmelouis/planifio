@@ -7,7 +7,8 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardContent
+  CardContent,
+  CardDescription
 } from '@/components/ui/card'
 
 import { CreditCardIcon, Nfc, HandCoins, Download } from 'lucide-vue-next'
@@ -48,13 +49,14 @@ import {
   useVueTable,
 } from '@tanstack/vue-table'
 import { ArrowUpDown, ChevronDown } from 'lucide-vue-next'
-import { h, ref } from 'vue'
+import { h, ref, onMounted, computed } from 'vue'
 
 export interface Payment {
   id: string
   amount: number
   status: 'pending' | 'processing' | 'success' | 'failed'
   email: string
+  title?: string
 }
 
 const data: Payment[] = [
@@ -63,32 +65,54 @@ const data: Payment[] = [
     amount: 316,
     status: 'success',
     email: 'ken99@yahoo.com',
+    title: 'Freelance Design'
   },
   {
     id: '3u1reuv4',
     amount: 242,
     status: 'success',
     email: 'Abe45@gmail.com',
+    title: 'Web Development'
   },
   {
     id: 'derv1ws0',
     amount: 837,
     status: 'processing',
     email: 'Monserrat44@gmail.com',
+    title: 'Consulting'
   },
   {
     id: '5kma53ae',
     amount: 874,
     status: 'success',
     email: 'Silas22@gmail.com',
+    title: 'Monthly Salary'
   },
   {
     id: 'bhqecj4p',
     amount: 721,
     status: 'failed',
     email: 'carmella@hotmail.com',
+    title: 'Project Payment'
   },
 ]
+
+const storedTransactions = ref<Payment[]>([])
+onMounted(() => {
+  try {
+    const transactions = localStorage.getItem('transactions')
+    if (transactions) {
+      const parsedTransactions = JSON.parse(transactions)
+      storedTransactions.value = parsedTransactions
+    }
+  } catch (error) {
+    console.error('Error loading transactions from localStorage:', error)
+  }
+})
+
+const combinedData = computed(() => {
+  return [...data, ...storedTransactions.value]
+})
 
 const columns: ColumnDef<Payment>[] = [
   {
@@ -105,6 +129,11 @@ const columns: ColumnDef<Payment>[] = [
     }),
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    accessorKey: 'title',
+    header: 'Title',
+    cell: ({ row }) => h('div', { class: 'font-medium' }, row.getValue('title') || 'Unnamed'),
   },
   {
     accessorKey: 'status',
@@ -154,7 +183,7 @@ const rowSelection = ref({})
 const expanded = ref<ExpandedState>({})
 
 const table = useVueTable({
-  data,
+  data: combinedData,
   columns,
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
@@ -313,6 +342,29 @@ const exportToCSV = () => {
         </TableBody>
       </Table>
     </div>
+    <div class="flex items-center justify-end space-x-2 py-4">
+      <div class="flex-1 text-sm text-muted-foreground">
+        {{ table.getFilteredSelectedRowModel().rows.length }} of {{ table.getFilteredRowModel().rows.length }} row(s)
+        selected.
+      </div>
+      <div class="space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          @click="table.previousPage()"
+          :disabled="!table.getCanPreviousPage()"
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          @click="table.nextPage()"
+          :disabled="!table.getCanNextPage()"
+        >
+          Next
+        </Button>
+      </div>
+    </div>
   </div>
-
 </template>

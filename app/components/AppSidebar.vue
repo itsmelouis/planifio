@@ -27,7 +27,7 @@ const topItems = [
   },
   {
     title: "Payments",
-    url: "#",
+    url: "/payments",
     icon: CreditCard,
   },
   {
