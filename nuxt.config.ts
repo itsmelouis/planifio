@@ -6,7 +6,13 @@ export default defineNuxtConfig({
     compatibilityVersion: 4
   },
 
-  modules: ['@vite-pwa/nuxt', 'shadcn-nuxt', '@nuxtjs/tailwindcss', '@nuxtjs/color-mode'],
+  modules: [
+    '@vite-pwa/nuxt',
+    'shadcn-nuxt',
+    '@nuxtjs/tailwindcss',
+    '@nuxtjs/color-mode',
+    'nuxt-auth-utils',
+  ],
 
   colorMode: {
     classSuffix: ''
@@ -16,11 +22,7 @@ export default defineNuxtConfig({
      * Prefix for all the imported component
      */
     prefix: '',
-    /**
-     * Directory that the component lives in.
-     * @default "./components/ui"
-     */
-    componentDir: './components/ui'
+    componentDir: './app/components/ui'
   },
   imports: {
     autoImport: true,
