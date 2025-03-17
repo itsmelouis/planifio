@@ -41,6 +41,11 @@ type Props = {
 
 const props = defineProps<Props>();
 
+const cardData = ref({
+  number: '',
+  holder: '',
+  expiry: '',
+});
 const isVisible = ref(false);
 
 const generateCardData = () => {
@@ -66,7 +71,9 @@ const generateCardData = () => {
   };
 };
 
-const cardData = generateCardData();
+onMounted(() => {
+  cardData.value = generateCardData();
+});
 
 const getMaskedNumber = (number: string) => {
   const lastFour = number.slice(-4);

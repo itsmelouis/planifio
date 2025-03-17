@@ -51,6 +51,18 @@ import {
 } from '@tanstack/vue-table'
 import { ArrowUpDown, ChevronDown } from 'lucide-vue-next'
 import { h, ref, onMounted, computed } from 'vue'
+import { toast } from '~/components/ui/toast'
+
+const { $pwa } = useNuxtApp()
+
+onMounted(() => {
+  console.log('PWA:', $pwa)
+  if($pwa?.offlineReady){
+    toast({
+      title: 'App ready to work offline'
+    })
+  }
+})
 
 export interface Payment {
   id: string
