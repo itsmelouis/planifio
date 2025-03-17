@@ -3,7 +3,6 @@ export default defineOAuthGitHubEventHandler({
     emailRequired: true
   },
   async onSuccess(event, { user, tokens }) {
-    console.log('GitHub OAuth success:', user)
     await setUserSession(event, {
       user: {
         provider: 'github',
@@ -16,8 +15,8 @@ export default defineOAuthGitHubEventHandler({
     return sendRedirect(event, '/')
   },
   // Optional, will return a json error and 401 status code by default
-  onError(event, error) {
-    console.error('GitHub OAuth error:', error)
-    return sendRedirect(event, '/login')
-  },
+  // onError(event, error) {
+  //   console.error('GitHub OAuth error:', error)
+  //   return sendRedirect(event, '/login')
+  // },
 })

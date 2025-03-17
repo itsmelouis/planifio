@@ -17,6 +17,20 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 const { user, clear } = useUserSession();
+
+async function logout() {
+  await clear();
+  if ('serviceWorker' in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations()
+    for (const registration of registrations) {
+      registration.unregister()
+    }
+    // Optionnel: vider le cache si nécessaire
+    const cacheNames = await caches.keys()
+    await Promise.all(cacheNames.map(cache => caches.delete(cache)))
+  }
+  await navigateTo('/login');
+}
 </script>
 
 <template>
@@ -57,7 +71,7 @@ const { user, clear } = useUserSession();
         <DropdownMenuItem>New Team</DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
-      <DropdownMenuItem class="text-red-500 focus:text-red-500" @click="clear">
+      <DropdownMenuItem class="text-red-500 focus:text-red-500" @click="logout">
         Log out
         <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
       </DropdownMenuItem>

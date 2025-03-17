@@ -14,6 +14,7 @@ import { Github } from 'lucide-vue-next';
 
 import { useToast } from '@/components/ui/toast/use-toast'
 
+const { openInPopup } = useUserSession()
 const { toast } = useToast()
 
 definePageMeta({
