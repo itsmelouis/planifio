@@ -75,3 +75,15 @@ bun run preview
 Consultez la [documentation de déploiement](https://nuxt.com/docs/getting-started/deployment) pour plus d'informations.
 
 > 📌 **Attention :** Si vous rencontrez des difficultés lors du mode hors ligne, vérifiez que la case `Bypass for Network` dans l'onglet `Applications` > `Service Worker` soit décochée
+
+## PWA 
+
+Les différentes fonctionnalités de PWA de ce projet sont les suivantes : 
+
+- [x] Installation de l'application bureautique et/ou sur mobile.
+- [x] Mode hors ligne.
+- [x] Actualisation de la page en arrière-plan.
+- [x] Mise en cache (utilisée avec le mode hors ligne).
+
+La configuration globale de la PWA se trouve dans le fichier [nuxt.config.ts](./nuxt.config.ts) sous la clé `pwa`. En ce qui concerne le service worker (SW), ce dernier se trouve dans le fichier [sw.ts](.app/service-worker/sw.ts).
+et contient les différentes stratégies de mise en cache.
