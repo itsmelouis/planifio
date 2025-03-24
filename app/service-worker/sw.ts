@@ -52,7 +52,7 @@ registerRoute(
 
 // Cache navigations for offline usage (except /api, /auth, /login)
 registerRoute(
-  new NavigationRoute(createHandlerBoundToURL('/index.html'), {
+  new NavigationRoute(createHandlerBoundToURL('/'), {
     denylist: [/^\/api\//, /^\/auth\//, /^\/login/],
   })
 )
