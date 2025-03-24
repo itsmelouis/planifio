@@ -1,10 +1,10 @@
-# Nuxt 3 Minimal Starter
+# Démarrage Minimal avec Nuxt 3
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Consultez la [documentation de Nuxt 3](https://nuxt.com/docs/getting-started/introduction) pour en savoir plus.
 
-## Setup
+## Installation
 
-Make sure to install the dependencies:
+Assurez-vous d'installer les dépendances :
 
 ```bash
 # npm
@@ -20,9 +20,9 @@ yarn install
 bun install
 ```
 
-## Development Server
+## Serveur de Développement
 
-Start the development server on `http://localhost:3000`:
+Démarrez le serveur de développement sur `http://localhost:3000` :
 
 ```bash
 # npm
@@ -40,7 +40,7 @@ bun run dev
 
 ## Production
 
-Build the application for production:
+Construire l'application pour la production :
 
 ```bash
 # npm
@@ -56,7 +56,7 @@ yarn build
 bun run build
 ```
 
-Locally preview production build:
+Prévisualiser localement la version de production :
 
 ```bash
 # npm
@@ -72,4 +72,6 @@ yarn preview
 bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Consultez la [documentation de déploiement](https://nuxt.com/docs/getting-started/deployment) pour plus d'informations.
+
+> 📌 **Attention :** Si vous rencontrez des difficultés lors du mode hors ligne, vérifiez que la case `Bypass for Network` dans l'onglet `Applications` > `Service Worker` soit décochée
