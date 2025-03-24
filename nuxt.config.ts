@@ -32,6 +32,7 @@ export default defineNuxtConfig({
     srcDir: 'service-worker',
     filename: 'sw.ts',
     registerType: 'autoUpdate',
+    registerWebManifestInRouteRules: true,
     manifest: {
       name: 'Planifio PWA',
       short_name: 'Planifio',
@@ -50,11 +51,9 @@ export default defineNuxtConfig({
         },
       ],
     },
-    workbox: {
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}', '_nuxt/**', 'manifest.webmanifest', 'index.html'],
-    },
     injectManifest: {
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}', '_nuxt/**', 'manifest.webmanifest', 'index.html'],
+      globPatterns: ['**/*.{js,json,css,html,txt,svg,png,ico,webp,woff,woff2,ttf,eot,otf,wasm}'],
+      globIgnores: ['manifest**.webmanifest'],
     },
     client: {
       installPrompt: true,
