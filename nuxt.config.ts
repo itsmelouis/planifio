@@ -51,10 +51,10 @@ export default defineNuxtConfig({
       ],
     },
     workbox: {
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}', '_nuxt/**', 'manifest.webmanifest'],
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}', '_nuxt/**', 'manifest.webmanifest', 'index.html'],
     },
     injectManifest: {
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}', '_nuxt/**', 'manifest.webmanifest'],
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}', '_nuxt/**', 'manifest.webmanifest', 'index.html'],
     },
     client: {
       installPrompt: true,
